@@ -396,57 +396,57 @@
     </form>
   </div>
   <script>
-  async function sendToGoogleSheet(event) {
-    event.preventDefault();
+    async function sendToGoogleSheet(event) {
+      event.preventDefault();
 
-    const form = event.target;
-    const data = {
-      firstName: form.firstName.value,
-      lastName: form.lastName.value,
-      email: form.email.value,
-      phone: form.phone.value,
-      dob: form.dob.value,
-      purchaseAddress1: form.purchaseAddress1.value,
-      purchaseAddress2: form.purchaseAddress2.value,
-      purchaseCity: form.purchaseCity.value,
-      purchaseState: form.purchaseState.value,
-      purchaseZip: form.purchaseZip.value,
-      previousAddress1: form.previousAddress1.value,
-      previousAddress2: form.previousAddress2.value,
-      previousCity: form.previousCity.value,
-      previousState: form.previousState.value,
-      previousZip: form.previousZip.value,
-      whoReferredYou: form.whoReferredYou.value,
-      referralFirstName: form.referralFirstName.value,
-      referralLastName: form.referralLastName.value,
-      referralEmail: form.referralEmail.value,
-      referralPhone: form.referralPhone.value,
-      referralCompany: form.referralCompany.value
-    };
+      const form = event.target;
+      const data = {
+        firstName: form.firstName.value,
+        lastName: form.lastName.value,
+        email: form.email.value,
+        phone: form.phone.value,
+        dob: form.dob.value,
+        purchaseAddress1: form.purchaseAddress1.value,
+        purchaseAddress2: form.purchaseAddress2.value,
+        purchaseCity: form.purchaseCity.value,
+        purchaseState: form.purchaseState.value,
+        purchaseZip: form.purchaseZip.value,
+        previousAddress1: form.previousAddress1.value,
+        previousAddress2: form.previousAddress2.value,
+        previousCity: form.previousCity.value,
+        previousState: form.previousState.value,
+        previousZip: form.previousZip.value,
+        whoReferredYou: form.whoReferredYou.value,
+        referralFirstName: form.referralFirstName.value,
+        referralLastName: form.referralLastName.value,
+        referralEmail: form.referralEmail.value,
+        referralPhone: form.referralPhone.value,
+        referralCompany: form.referralCompany.value
+      };
 
-    try {
-      const response = await fetch('https://script.google.com/macros/s/AKfycbzzHTtXxbrzJJIdE5B-wP4qT2pPb65QqufpWVoplUkYfD1gLKrvYcEvuHXMasiNHo4d/exec', {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-      });
+      try {
+        const response = await fetch('https://script.google.com/macros/s/AKfycbySnTEJzWc9R34ebztAoVp8RedLE0CiFg6fjHrbEyuJbcn0b52g7FhQepBuT-XKM0xh/exec', {
+          method: 'POST',
+          mode: 'cors',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
 
-      if (response.ok) {
-        document.getElementById('submit-message').style.display = 'block';
-        form.reset();
-      } else {
-        alert('There was an error submitting the form. Please try again.');
+        if (response.ok) {
+          document.getElementById('submit-message').style.display = 'block';
+          form.reset();
+        } else {
+          alert('There was an error submitting the form. Please try again.');
+        }
+      } catch (error) {
+        console.error('Submission error:', error);
+        alert('Submission failed. Please check your internet connection or try again later.');
       }
-    } catch (error) {
-      console.error('Submission error:', error);
-      alert('Submission failed. Please check your internet connection or try again later.');
     }
-  }
 
-  document.getElementById('driver-form').addEventListener('submit', sendToGoogleSheet);
+    document.getElementById('driver-form').addEventListener('submit', sendToGoogleSheet);
   </script>
 </body>
 </html>
