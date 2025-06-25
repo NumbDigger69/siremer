@@ -1,12 +1,40 @@
-
+```
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GoDaddy Chatbot Embed</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* CSS removed for brevity - it will be included in the full solution */
+    </style>
+</head>
+<body>
+    <div id="chatWidget" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;">
+        <div id="chatIcon" style="width: 60px; height: 60px; background: linear-gradient(135deg, #5a9bd5, #1a365d); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; animation: pulse 2s infinite;">
+            <i class="fas fa-comment-dots" style="font-size: 24px;"></i>
+        </div>
+        <iframe id="chatFrame" src="about:blank" style="width: 380px; height: 500px; border: none; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); display: none;"></iframe>
+    </div>
+
+    <script>
+        // Load Font Awesome
+        const faScript = document.createElement('script');
+        faScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js';
+        document.head.appendChild(faScript);
+
+        // Chatbot functionality
+        const chatIcon = document.getElementById('chatIcon');
+        const chatFrame = document.getElementById('chatFrame');
+        
+        // Set iframe content
+        chatFrame.srcdoc = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoDaddy Chatbot</title>
     <style>
         :root {
             --godaddy-blue: #5a9bd5;
@@ -14,44 +42,178 @@
             --godaddy-light-gray: #f7fafc;
             --godaddy-gray: #e2e8f0;
         }
-
-        iframe {
-            width: 100%;
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
             height: 100%;
-            border: none;
+            background-color: var(--godaddy-light-gray);
         }
 
-        .iframe-container {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 22rem;
-            height: 32rem;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-            border-radius: 1rem;
-            overflow: hidden;
-            z-index: 1000;
-            display: none;
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
         }
 
-        .chat-icon {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            width: 60px;
-            height: 60px;
+        .chat-header {
             background: linear-gradient(135deg, var(--godaddy-blue), var(--godaddy-dark-blue));
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background-color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            cursor: pointer;
-            z-index: 1000;
-            animation: pulse 2s infinite;
+            margin-right: 0.75rem;
         }
 
+        .message {
+            max-width: 80%;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.75rem;
+            border-radius: 1rem;
+            position: relative;
+            animation: fadeIn 0.3s ease-out;
+            line-height: 1.5;
+        }
+
+        .user-message {
+            background-color: var(--godaddy-blue);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .bot-message {
+            background-color: white;
+            color: var(--godaddy-dark-blue);
+            margin-right: auto;
+            border-bottom-left-radius: 0.25rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .typing-indicator {
+            display: flex;
+            padding: 0.5rem 1rem;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--godaddy-blue);
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: typingAnimation 1.4s infinite ease-in-out;
+        }
+
+        @keyframes typingAnimation {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-5px); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .quick-reply {
+            display: inline-block;
+            background-color: white;
+            color: var(--godaddy-blue);
+            border: 1px solid var(--godaddy-blue);
+            border-radius: 1.5rem;
+            padding: 0.5rem 1rem;
+            margin: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+
+        .quick-reply:hover {
+            background-color: var(--godaddy-blue);
+            color: white;
+        }
+
+        .messages-container {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            height: calc(100% - 200px);
+        }
+
+        .input-area {
+            padding: 0.75rem;
+            border-top: 1px solid var(--godaddy-gray);
+            background-color: var(--godaddy-light-gray);
+        }
+
+        .input-container {
+            display: flex;
+        }
+
+        input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--godaddy-gray);
+            border-radius: 2rem;
+            outline: none;
+            font-size: 0.875rem;
+        }
+
+        button {
+            background-color: var(--godaddy-blue);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-left: 0.5rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: var(--godaddy-dark-blue);
+        }
+
+        .quick-replies {
+            margin-top: 0.5rem;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .help-option {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 0.5rem;
+            background-color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .help-option:hover {
+            background-color: var(--godaddy-gray);
+        }
+
+        .help-option i {
+            margin-right: 0.75rem;
+            color: var(--godaddy-blue);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+        
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
@@ -60,360 +222,160 @@
     </style>
 </head>
 <body>
-    <!-- Floating Chat Icon -->
-    <div class="chat-icon" id="chatIcon" onclick="toggleChat()">
-        <i class="fas fa-comment-dots fa-lg"></i>
-    </div>
+    <div class='chat-container'>
+        <div class='chat-header'>
+            <div class='logo'>
+                <i class='fas fa-robot' style='color: #5a9bd5;'></i>
+            </div>
+            <div>
+                <h2 style='font-weight: bold; font-size: 1.125rem; margin: 0;'>GoDaddy AI Assistant</h2>
+                <p style='font-size: 0.75rem; margin: 0; opacity: 0.8;'>Typically replies in seconds</p>
+            </div>
+            <button onclick='window.parent.hideChat()' style='background: none; border: none; color: white; margin-left: auto; cursor: pointer;'>
+                <i class='fas fa-times'></i>
+            </button>
+        </div>
 
-    <!-- Chat Container -->
-    <div class="iframe-container" id="chatContainer">
-        <iframe src="data:text/html;charset=utf-8,
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <style>
-                :root {
-                    --godaddy-blue: #5a9bd5;
-                    --godaddy-dark-blue: #1a365d;
-                    --godaddy-light-gray: #f7fafc;
-                    --godaddy-gray: #e2e8f0;
-                }
-                
-                body {
-                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                    margin: 0;
-                    height: 100%;
-                    overflow: hidden;
-                    background-color: var(--godaddy-light-gray);
-                }
-
-                .chat-container {
-                    display: flex;
-                    flex-direction: column;
-                    height: 100%;
-                }
-
-                .chat-header {
-                    background: linear-gradient(135deg, var(--godaddy-blue), var(--godaddy-dark-blue));
-                    color: white;
-                    padding: 1rem;
-                    display: flex;
-                    align-items: center;
-                }
-
-                .logo {
-                    width: 40px;
-                    height: 40px;
-                    background-color: white;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    margin-right: 0.75rem;
-                }
-
-                .message {
-                    max-width: 80%;
-                    padding: 0.75rem 1rem;
-                    margin-bottom: 0.75rem;
-                    border-radius: 1rem;
-                    position: relative;
-                    animation: fadeIn 0.3s ease-out;
-                    line-height: 1.5;
-                }
-
-                .user-message {
-                    background-color: var(--godaddy-blue);
-                    color: white;
-                    margin-left: auto;
-                    border-bottom-right-radius: 0.25rem;
-                }
-
-                .bot-message {
-                    background-color: white;
-                    color: var(--godaddy-dark-blue);
-                    margin-right: auto;
-                    border-bottom-left-radius: 0.25rem;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-                }
-
-                .typing-indicator {
-                    display: flex;
-                    padding: 0.5rem 1rem;
-                }
-
-                .typing-dot {
-                    width: 8px;
-                    height: 8px;
-                    background-color: var(--godaddy-blue);
-                    border-radius: 50%;
-                    margin: 0 2px;
-                    animation: typingAnimation 1.4s infinite ease-in-out;
-                }
-
-                @keyframes typingAnimation {
-                    0%, 60%, 100% { transform: translateY(0); }
-                    30% { transform: translateY(-5px); }
-                }
-
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(10px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
-
-                .quick-reply {
-                    display: inline-block;
-                    background-color: white;
-                    color: var(--godaddy-blue);
-                    border: 1px solid var(--godaddy-blue);
-                    border-radius: 1.5rem;
-                    padding: 0.5rem 1rem;
-                    margin: 0.25rem;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                    font-size: 0.875rem;
-                }
-
-                .quick-reply:hover {
-                    background-color: var(--godaddy-blue);
-                    color: white;
-                }
-
-                .messages-container {
-                    flex: 1;
-                    padding: 1rem;
-                    overflow-y: auto;
-                }
-
-                .input-area {
-                    padding: 0.75rem;
-                    border-top: 1px solid var(--godaddy-gray);
-                    background-color: var(--godaddy-light-gray);
-                }
-
-                .input-container {
-                    display: flex;
-                }
-
-                input {
-                    flex: 1;
-                    padding: 0.75rem 1rem;
-                    border: 1px solid var(--godaddy-gray);
-                    border-radius: 2rem;
-                    outline: none;
-                    font-size: 0.875rem;
-                }
-
-                input:focus {
-                    border-color: var(--godaddy-blue);
-                    box-shadow: 0 0 0 2px rgba(90,155,213,0.3);
-                }
-
-                button {
-                    background-color: var(--godaddy-blue);
-                    color: white;
-                    border: none;
-                    border-radius: 50%;
-                    width: 40px;
-                    height: 40px;
-                    margin-left: 0.5rem;
-                    cursor: pointer;
-                    transition: background-color 0.2s;
-                }
-
-                button:hover {
-                    background-color: var(--godaddy-dark-blue);
-                }
-
-                .quick-replies {
-                    margin-top: 0.5rem;
-                    display: flex;
-                    flex-wrap: wrap;
-                }
-
-                .help-option {
-                    display: flex;
-                    align-items: center;
-                    padding: 0.75rem;
-                    border-radius: 0.5rem;
-                    margin-bottom: 0.5rem;
-                    background-color: white;
-                    cursor: pointer;
-                    transition: all 0.2s ease;
-                }
-
-                .help-option:hover {
-                    background-color: var(--godaddy-gray);
-                }
-
-                .help-option i {
-                    margin-right: 0.75rem;
-                    color: var(--godaddy-blue);
-                }
-
-                .hidden {
-                    display: none !important;
-                }
-            </style>
-        </head>
-        <body>
-            <div class='chat-container'>
-                <div class='chat-header'>
-                    <div class='logo'>
-                        <i class='fas fa-robot' style='color: #5a9bd5;'></i>
+        <div class='messages-container' id='messages'>
+            <div class='bot-message'>
+                <p>Hi there! 👋 I'm your GoDaddy AI Assistant. How can I help you with your website today?</p>
+                <div style='margin-top: 0.5rem;'>
+                    <div class='help-option' onclick='sendQuickMessage(this)'>
+                        <i class='fas fa-globe'></i>
+                        <span>Help me choose a domain name</span>
                     </div>
-                    <div>
-                        <h2 style='font-weight: bold; font-size: 1.125rem; margin: 0;'>GoDaddy AI Assistant</h2>
-                        <p style='font-size: 0.75rem; margin: 0; opacity: 0.8;'>Typically replies in seconds</p>
+                    <div class='help-option' onclick='sendQuickMessage(this)'>
+                        <i class='fas fa-paint-brush'></i>
+                        <span>Design tips for my website</span>
                     </div>
-                    <button onclick='window.parent.closeChat()' style='background: none; border: none; color: white; margin-left: auto; cursor: pointer;'>
-                        <i class='fas fa-times'></i>
-                    </button>
-                </div>
-
-                <div class='messages-container' id='messages'>
-                    <div class='bot-message'>
-                        <p>Hi there! 👋 I'm your GoDaddy AI Assistant. How can I help you with your website today?</p>
-                        <div style='margin-top: 0.5rem;'>
-                            <div class='help-option' onclick='sendQuickMessage(this)'>
-                                <i class='fas fa-globe'></i>
-                                <span>Help me choose a domain name</span>
-                            </div>
-                            <div class='help-option' onclick='sendQuickMessage(this)'>
-                                <i class='fas fa-paint-brush'></i>
-                                <span>Design tips for my website</span>
-                            </div>
-                            <div class='help-option' onclick='sendQuickMessage(this)'>
-                                <i class='fas fa-shopping-cart'></i>
-                                <span>Set up an online store</span>
-                            </div>
-                            <div class='help-option' onclick='sendQuickMessage(this)'>
-                                <i class='fas fa-chart-line'></i>
-                                <span>Improve my SEO</span>
-                            </div>
-                        </div>
+                    <div class='help-option' onclick='sendQuickMessage(this)'>
+                        <i class='fas fa-shopping-cart'></i>
+                        <span>Set up an online store</span>
                     </div>
-                </div>
-
-                <div class='typing-indicator hidden' id='typing'>
-                    <div class='typing-dot'></div>
-                    <div class='typing-dot'></div>
-                    <div class='typing-dot'></div>
-                </div>
-
-                <div class='input-area'>
-                    <div class='input-container'>
-                        <input type='text' id='userInput' placeholder='Type your message...' onkeypress='handleKeyPress(event)'>
-                        <button onclick='sendMessage()'>
-                            <i class='fas fa-paper-plane'></i>
-                        </button>
-                    </div>
-                    <div class='quick-replies'>
-                        <div class='quick-reply' onclick='quickReplyClick(this)'>Domain help</div>
-                        <div class='quick-reply' onclick='quickReplyClick(this)'>Website builder</div>
-                        <div class='quick-reply' onclick='quickReplyClick(this)'>Hosting</div>
-                        <div class='quick-reply' onclick='quickReplyClick(this)'>Email setup</div>
+                    <div class='help-option' onclick='sendQuickMessage(this)'>
+                        <i class='fas fa-chart-line'></i>
+                        <span>Improve my SEO</span>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <script>
-                const messages = document.getElementById('messages');
-                const userInput = document.getElementById('userInput');
-                const typing = document.getElementById('typing');
+        <div class='typing-indicator hidden' id='typing'>
+            <div class='typing-dot'></div>
+            <div class='typing-dot'></div>
+            <div class='typing-dot'></div>
+        </div>
 
-                function sendMessage() {
-                    const message = userInput.value.trim();
-                    if (message) {
-                        addMessage(message, 'user');
-                        userInput.value = '';
-                        simulateTyping();
-                    }
-                }
-
-                function handleKeyPress(e) {
-                    if (e.key === 'Enter') {
-                        sendMessage();
-                    }
-                }
-
-                function quickReplyClick(element) {
-                    userInput.value = element.textContent;
-                    sendMessage();
-                }
-
-                function sendQuickMessage(element) {
-                    const text = element.querySelector('span').textContent;
-                    addMessage(text, 'user');
-                    simulateTyping();
-                }
-
-                function addMessage(text, sender) {
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = `message ${sender}-message`;
-                    messageDiv.innerHTML = `<p>${text}</p>`;
-                    messages.appendChild(messageDiv);
-                    messages.scrollTop = messages.scrollHeight;
-                }
-
-                function simulateTyping() {
-                    typing.classList.remove('hidden');
-                    setTimeout(() => {
-                        typing.classList.add('hidden');
-                        const response = generateResponse(userInput.value || messages.lastChild.textContent);
-                        addMessage(response, 'bot');
-                    }, 1500 + Math.random() * 1000);
-                }
-
-                function generateResponse(message) {
-                    const lowerMessage = message.toLowerCase();
-                    
-                    if (lowerMessage.includes('domain') || lowerMessage.includes('name')) {
-                        return \"Great! Choosing the right domain name is important. I recommend something short, memorable, and related to your business. Would you like me to check availability for a specific name?\";
-                    } else if (lowerMessage.includes('design') || lowerMessage.includes('look')) {
-                        return \"For website design, consider these tips: 1) Keep it clean and uncluttered, 2) Use consistent colors and fonts, 3) Make sure it's mobile-friendly. Would you like to see some template suggestions?\";
-                    } else if (lowerMessage.includes('store') || lowerMessage.includes('ecommerce')) {
-                        return \"Setting up an online store is easy with GoDaddy! You'll need to: 1) Choose an eCommerce plan, 2) Add products, 3) Set up payments. I can guide you through each step.\";
-                    } else if (lowerMessage.includes('seo') || lowerMessage.includes('search')) {
-                        return \"To improve SEO: 1) Use relevant keywords in your content, 2) Add meta descriptions, 3) Ensure fast loading speed, 4) Get quality backlinks. Would you like a detailed SEO checklist?\";
-                    } else if (lowerMessage.includes('hosting')) {
-                        return \"GoDaddy offers several hosting options depending on your needs: Shared hosting for small sites, VPS for more control, or Dedicated servers for high traffic. What type of website are you running?\";
-                    } else if (lowerMessage.includes('email')) {
-                        return \"You can set up professional email with your domain name. We offer email hosting plans with features like spam protection and calendar integration. How many email addresses do you need?\";
-                    } else {
-                        const responses = [
-                            \"I'd be happy to help with that! Could you provide more details about what you need?\",
-                            \"That's a great question! Let me connect you with the right resources.\",
-                            \"I can definitely assist you with that. What specific aspect are you interested in?\",
-                            \"Thanks for your question! Here's some information that might help...\"
-                        ];
-                        return responses[Math.floor(Math.random() * responses.length)];
-                    }
-                }
-            </script>
-        </body>
-        </html>
-        "></iframe>
+        <div class='input-area'>
+            <div class='input-container'>
+                <input type='text' id='userInput' placeholder='Type your message...' onkeypress='handleKeyPress(event)'>
+                <button onclick='sendMessage()'>
+                    <i class='fas fa-paper-plane'></i>
+                </button>
+            </div>
+            <div class='quick-replies'>
+                <div class='quick-reply' onclick='quickReplyClick(this)'>Domain help</div>
+                <div class='quick-reply' onclick='quickReplyClick(this)'>Website builder</div>
+                <div class='quick-reply' onclick='quickReplyClick(this)'>Hosting</div>
+                <div class='quick-reply' onclick='quickReplyClick(this)'>Email setup</div>
+            </div>
+        </div>
     </div>
 
     <script>
-        function toggleChat() {
-            const container = document.getElementById('chatContainer');
-            const icon = document.getElementById('chatIcon');
-            
-            if (container.style.display === 'none' || !container.style.display) {
-                container.style.display = 'block';
-                icon.classList.add('hidden');
-            } else {
-                container.style.display = 'none';
-                icon.classList.remove('hidden');
+        const messages = document.getElementById('messages');
+        const userInput = document.getElementById('userInput');
+        const typing = document.getElementById('typing');
+
+        function sendMessage() {
+            const message = userInput.value.trim();
+            if (message) {
+                addMessage(message, 'user');
+                userInput.value = '';
+                simulateTyping();
             }
         }
 
-        function closeChat() {
-            document.getElementById('chatContainer').style.display = 'none';
-            document.getElementById('chatIcon').classList.remove('hidden');
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function quickReplyClick(element) {
+            userInput.value = element.textContent;
+            sendMessage();
+        }
+
+        function sendQuickMessage(element) {
+            const text = element.querySelector('span').textContent;
+            addMessage(text, 'user');
+            simulateTyping();
+        }
+
+        function addMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = \`message \${sender}-message\`;
+            messageDiv.innerHTML = \`<p>\${text}</p>\`;
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function simulateTyping() {
+            typing.classList.remove('hidden');
+            setTimeout(() => {
+                typing.classList.add('hidden');
+                const response = generateResponse(userInput.value || messages.lastChild.textContent);
+                addMessage(response, 'bot');
+            }, 1500 + Math.random() * 1000);
+        }
+
+        function generateResponse(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            if (lowerMessage.includes('domain') || lowerMessage.includes('name')) {
+                return "Great! Choosing the right domain name is important. I recommend something short, memorable, and related to your business. Would you like me to check availability for a specific name?";
+            } else if (lowerMessage.includes('design') || lowerMessage.includes('look')) {
+                return "For website design, consider these tips: 1) Keep it clean and uncluttered, 2) Use consistent colors and fonts, 3) Make sure it's mobile-friendly. Would you like to see some template suggestions?";
+            } else if (lowerMessage.includes('store') || lowerMessage.includes('ecommerce')) {
+                return "Setting up an online store is easy with GoDaddy! You'll need to: 1) Choose an eCommerce plan, 2) Add products, 3) Set up payments. I can guide you through each step.";
+            } else if (lowerMessage.includes('seo') || lowerMessage.includes('search')) {
+                return "To improve SEO: 1) Use relevant keywords in your content, 2) Add meta descriptions, 3) Ensure fast loading speed, 4) Get quality backlinks. Would you like a detailed SEO checklist?";
+            } else if (lowerMessage.includes('hosting')) {
+                return "GoDaddy offers several hosting options depending on your needs: Shared hosting for small sites, VPS for more control, or Dedicated servers for high traffic. What type of website are you running?";
+            } else if (lowerMessage.includes('email')) {
+                return "You can set up professional email with your domain name. We offer email hosting plans with features like spam protection and calendar integration. How many email addresses do you need?";
+            } else {
+                const responses = [
+                    "I'd be happy to help with that! Could you provide more details about what you need?",
+                    "That's a great question! Let me connect you with the right resources.",
+                    "I can definitely assist you with that. What specific aspect are you interested in?",
+                    "Thanks for your question! Here's some information that might help..."
+                ];
+                return responses[Math.floor(Math.random() * responses.length)];
+            }
+        }
+        
+        function hideChat() {
+            window.parent.hideChatFrame();
         }
     </script>
 </body>
 </html>
+        `;
+
+        // Toggle chat visibility
+        chatIcon.addEventListener('click', function() {
+            chatFrame.style.display = chatFrame.style.display === 'none' ? 'block' : 'none';
+            chatIcon.style.display = 'none';
+        });
+
+        // Functions to control the chat from inside the iframe
+        window.hideChatFrame = function() {
+            chatFrame.style.display = 'none';
+            chatIcon.style.display = 'flex';
+        };
+    </script>
+</body>
+</html>
+```
